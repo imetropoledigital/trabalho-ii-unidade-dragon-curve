@@ -12,10 +12,10 @@ export default class UsersController {
     try {
       if(!name || !age){
         res.status(400).json({ error: "Nome e idade são obrigatórios" });
+        return;
       }
-      const user = new User(name, age);
-      UsersService.insertUser(user);
-      res.status(201).json({message: "Usuário criado com sucesso", user});
+      const insertedUser = await UsersService.insertUser(name, age);
+      res.status(201).json({message: "Usuário criado com sucesso", user: insertedUser});
     } catch (error) {
       //console.error(error);
       res.status(500).json({ error: "Erro ao criar o usuário" });
@@ -23,8 +23,22 @@ export default class UsersController {
     }
   }
 
-  static updateUser(req: Request, res: Response) : void {
-    throw new Error("Method unimplemented");
+  static async updateUser(req: Request, res: Response) {
+    const {name, age} = req.body
+    const { id } = req.params;
+    try {
+      if(!name || !age){
+        res.status(400).json({ error: "Nome e idade são obrigatórios" });
+        return;
+      }
+
+      const updatedUser = await UsersService.updateUser(id, name, age);
+      res.status(201).json({message: "Usuário atualizado com sucesso", user: updatedUser});
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Erro ao atualizar o usuário" });
+      //throw("Erro ao informar valores");
+    }
   }
 
   static listUsers(req: Request, res: Response) : void {
