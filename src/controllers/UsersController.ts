@@ -60,6 +60,14 @@ export default class UsersController {
       if(isNaN(Number(query.perPage))) throw new ValidationError("Parâmetro 'perPage' precisa ser um número");
       if(Number(query.perPage) < 1) throw new ValidationError("Parâmetro 'perPage' precisa ser pelo menos 1");
     }
+
+    if('query' in query) {
+      try {
+        JSON.parse(query.query);
+      } catch(error: unknown) {
+        throw new ValidationError("Parâmetro 'query' deve ser um JSON válido");
+      }
+    }
   }
 
   static async insertUser(req: Request<{}, any, CreateUserBody, {}>, res: Response){
@@ -90,12 +98,13 @@ export default class UsersController {
       const {page, perPage, query, fields} = req.query;
       const currentPage = page === undefined ? DEFAULT_PAGE : Number(page);
       const currentPerPage = perPage === undefined ? DEFAULT_PER_PAGE : Number(perPage);
+      const ALL_COMMAS = /,/g;
 
       const users = await UsersService.listUsers(
         currentPage,
         currentPerPage,
         query  === undefined ? DEFAULT_QUERY : JSON.parse(query),
-        fields === undefined ? DEFAULT_FIELDS : fields.replace(',', ' ')
+        fields === undefined ? DEFAULT_FIELDS : fields.replace(ALL_COMMAS, ' ')
       );
       return res.status(200).json({page: currentPage, perPage: currentPerPage, result: users});
     } catch(error: unknown) {

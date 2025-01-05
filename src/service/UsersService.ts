@@ -1,4 +1,8 @@
+import mongoose from "mongoose";
+import ConstraintError from "../errors/ConstraintError";
+import NotFoundError from "../errors/NotFoundError";
 import User from "../models/User";
+import ValidationError from "../errors/ValidationError";
 
 /**
  * No service ficam as regras de negócio. 
@@ -6,12 +10,22 @@ import User from "../models/User";
  */
 export default class UsersService {
   static async insertUser(name: string, age: number) {
+    const existingUser = await User.findOne({name}).exec();
+    if(existingUser !== null) throw new ConstraintError("Nome de usuário já foi escolhido");
     const user = new User({name, age});
     return await user.save();
   }
 
   static async updateUser(userId: string, newName?: string, newAge?: number) {
-   return await User.findByIdAndUpdate(userId, {name: newName, age: newAge}, {new: true}).exec();
+    const user = await User.findById(userId).exec();
+
+    if(user === null) throw new NotFoundError(`Usuário não encontrado`);
+    if(newName !== undefined && newName !== user.name) {
+      const existingUser = await User.findOne({name: newName}).exec();
+      if(existingUser !== null) throw new ConstraintError("Nome de usuário já foi escolhido");
+    }
+
+    return await User.findByIdAndUpdate(userId, {name: newName, age: newAge}, {new: true}).exec();
   }
 
   static async listUsers(
@@ -20,15 +34,25 @@ export default class UsersService {
     query: Object = {}, 
     fields: string = ''
   ) {
-    const list = await User.find(query, fields, {
-      skip: (page-1)*perPage,
-      limit: perPage
-    }).exec();
-    return list;
+    try {
+      const list = await User.find(query, fields, {
+        skip: (page-1)*perPage,
+        limit: perPage
+      }).exec();
+      return list;
+    } catch(error: unknown) {
+      if(error instanceof mongoose.Error.CastError) {
+        throw new ValidationError("Parâmetro 'query' é inválido");
+      } else {
+        throw error;
+      }
+    }
+   
   }
 
   static async getUser(userId: string, fields: string) {
-    const user = await User.findById(userId, fields);
+    const user = await User.findById(userId, fields).exec();
+    if(user === null) throw new NotFoundError("Usuário não encontrado");
     return user;
   }
 }
