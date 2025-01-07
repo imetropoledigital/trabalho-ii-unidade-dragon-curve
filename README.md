@@ -2,7 +2,12 @@
 
 ## Como rodar
 - Execute o comando `docker compose up` na pasta raíz do projeto para subir o banco de dados. (Você precisa ter o docker instalado)
+- Instale as dependências com `npm install`
+
+### Rodando em ambiente de desenvolvimento
 - Execute `npm run dev` na pasta raiz do projeto para executar em ambiente de desenvolvimento.
+
+### Rodando em ambiente de produção
 - Execute `npm run build` para buildar o projeto e depois execute `node ./dist/server.js` para executar a API em ambiente de produção 
 
 ## Documentação
