@@ -70,6 +70,8 @@ export default class UsersController {
     }
   }
 
+
+  
   static async insertUser(req: Request<{}, any, CreateUserBody, {}>, res: Response){
     try {
       UsersController.validateInsertBody(req.body);
