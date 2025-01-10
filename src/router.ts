@@ -62,7 +62,7 @@ router.get("/users/:id", (req, res) => {
  * @param {Express.Request} req O objeto de requisição, contendo o `id` do usuário na URL e os dados a serem atualizados no corpo da requisição.
  * @param {Express.Response} res O objeto de resposta, usado para enviar a resposta sobre o sucesso ou falha da atualização.
  * 
- * @returns {void}
+ * @returns {void} Retorna o unit.
  */
 router.put("/users/:id", (req, res) => {
   UsersController.updateUser(req, res)
